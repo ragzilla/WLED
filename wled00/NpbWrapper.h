@@ -3,6 +3,47 @@
 #define NpbWrapper_h
 
 //PIN CONFIGURATION
+//PIN CONFIGURATION
+#ifdef MULTILED
+  #define LEDPIN 19
+  #define LEDPIN0 19
+  #define PIXELMETHOD NeoEsp32Rmt0Ws2812xMethod
+  #define PIXELMETHOD0 NeoEsp32Rmt0Ws2812xMethod
+                         // for speed this implementation uses bit shifting and masking, hopefully quicker than integer math
+                         // you must fill the 3 values below with matching a column from this table for your longest string
+  #define LEDPERPIN 64   // this needs to represent a binary digit value,  e.g. 2,    4,    8,    16,   32,   64,   128,  256
+  #define LEDSHIFT 6     // number of bits to shift, based on LEDSPERPIN        1,    2,    3,    4,    5,    6,    7,    8
+  #define LEDMASK 0x3f   // the remainder mask, to send pin specific led        0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff
+  #if MULTILED > 1
+  #define LEDPIN1 18
+  #define PIXELMETHOD1 NeoEsp32Rmt1Ws2812xMethod
+  #if MULTILED > 2
+  #define LEDPIN2 5
+  #define PIXELMETHOD2 NeoEsp32Rmt2Ws2812xMethod
+  #if MULTILED > 3
+  #define LEDPIN3 17
+  #define PIXELMETHOD3 NeoEsp32Rmt3Ws2812xMethod
+  #if MULTILED > 4
+  #define LEDPIN4 33
+  #define PIXELMETHOD4 NeoEsp32Rmt4Ws2812xMethod
+  #if MULTILED > 5
+  #define LEDPIN5 25
+  #define PIXELMETHOD5 NeoEsp32Rmt5Ws2812xMethod
+  #if MULTILED > 6
+  #define LEDPIN6 26
+  #define PIXELMETHOD6 NeoEsp32Rmt6Ws2812xMethod
+  #if MULTILED > 7
+  #define LEDPIN7 27
+  #define PIXELMETHOD7 NeoEsp32Rmt7Ws2812xMethod
+  #endif // MULTILED > 7
+  #endif // MULTILED > 6
+  #endif // MULTILED > 5
+  #endif // MULTILED > 4
+  #endif // MULTILED > 3
+  #endif // MULTILED > 2
+  #endif // MULTILED > 1
+#endif // MULTILED
+
 #ifndef LEDPIN
 #define LEDPIN 2  //strip pin. Any for ESP32, gpio2 or 3 is recommended for ESP8266 (gpio2/3 are labeled D4/RX on NodeMCU and Wemos)
 #endif
@@ -95,6 +136,7 @@
 #endif
 
 //automatically uses the right driver method for each platform
+#ifndef PIXELMETHOD
 #ifdef ARDUINO_ARCH_ESP32
  #ifdef USE_APA102
   #define PIXELMETHOD DotStarMethod
@@ -129,7 +171,8 @@
   #define PIXELMETHOD NeoEsp8266BitBang800KbpsMethod
   #pragma message "Software BitBang will be used because of your selected LED pin. This may cause flicker. Use GPIO 2 or 3 for best results."
  #endif
-#endif
+#endif 
+#endif // PIXELMETHOD
 
 
 //you can now change the color order in the web settings
@@ -169,6 +212,29 @@ public:
   NeoPixelWrapper() :
     // initialize each member to null
     _pGrb(NULL),
+    #ifdef MULTILED
+      #if MULTILED > 1
+        _pGrb1(NULL),
+      #if MULTILED > 2
+        _pGrb2(NULL),
+      #if MULTILED > 3
+        _pGrb3(NULL),
+      #if MULTILED > 4
+        _pGrb4(NULL),
+      #if MULTILED > 5
+        _pGrb5(NULL),
+      #if MULTILED > 6
+        _pGrb6(NULL),
+      #if MULTILED > 7
+        _pGrb7(NULL),
+      #endif // MULTILED > 7
+      #endif // MULTILED > 6
+      #endif // MULTILED > 5
+      #endif // MULTILED > 4
+      #endif // MULTILED > 3
+      #endif // MULTILED > 2
+      #endif // MULTILED > 1
+    #endif // MULTILED
     _pGrbw(NULL),
     _type(NeoPixelType_None)
   {
@@ -191,11 +257,52 @@ public:
       #if defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
         _pGrb = new NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD>(countPixels, CLKPIN, DATAPIN);
       #else
+        #ifndef MULTILED
         _pGrb = new NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD>(countPixels, LEDPIN);
-      #endif
         _pGrb->Begin();
+        #else
+          _pGrb = new NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD>(LEDPERPIN, LEDPIN0);
+          _pGrb->Begin();
+          yield();
+          #if MULTILED > 1
+            _pGrb1 = new NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD1>(LEDPERPIN, LEDPIN1);
+            _pGrb1->Begin();
+            yield();
+          #if MULTILED > 2
+            _pGrb2 = new NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD2>(LEDPERPIN, LEDPIN2);
+            _pGrb2->Begin();
+            yield();
+          #if MULTILED > 3
+            _pGrb3 = new NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD3>(LEDPERPIN, LEDPIN3);
+            _pGrb3->Begin();
+            yield();
+          #if MULTILED > 4
+            _pGrb4 = new NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD4>(LEDPERPIN, LEDPIN4);
+            _pGrb4->Begin();
+            yield();
+          #if MULTILED > 5
+            _pGrb5 = new NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD5>(LEDPERPIN, LEDPIN5);
+            _pGrb5->Begin();
+            yield();
+          #if MULTILED > 6
+            _pGrb6 = new NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD6>(LEDPERPIN, LEDPIN6);
+            _pGrb6->Begin();
+            yield();
+          #if MULTILED > 7
+            _pGrb7 = new NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD7>(LEDPERPIN, LEDPIN7);
+            _pGrb7->Begin();
+            yield();
+          #endif // MULTILED > 7
+          #endif // MULTILED > 6
+          #endif // MULTILED > 5
+          #endif // MULTILED > 4
+          #endif // MULTILED > 3
+          #endif // MULTILED > 2
+          #endif // MULTILED > 1
+        #endif // MULTILED
+      #endif
       break;
-
+      
       case NeoPixelType_Grbw:
       #if defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
         _pGrbw = new NeoPixelBrightnessBus<PIXELFEATURE4,PIXELMETHOD>(countPixels, CLKPIN, DATAPIN);
@@ -277,7 +384,31 @@ public:
     byte b;
     switch (_type)
     {
-      case NeoPixelType_Grb:  _pGrb->Show();  break;
+      case NeoPixelType_Grb:  _pGrb->Show();  
+      #ifdef MULTILED
+        #if MULTILED > 1
+        _pGrb1->Show();
+        #if MULTILED > 2
+        _pGrb2->Show();
+        #if MULTILED > 3
+        _pGrb3->Show();
+        #if MULTILED > 4
+        _pGrb4->Show();
+        #if MULTILED > 5
+        _pGrb5->Show();
+        #if MULTILED > 6
+        _pGrb6->Show();
+        #if MULTILED > 7
+        _pGrb7->Show();
+        #endif // MULTILED > 7
+        #endif // MULTILED > 6
+        #endif // MULTILED > 5
+        #endif // MULTILED > 4
+        #endif // MULTILED > 3
+        #endif // MULTILED > 2
+        #endif // MULTILED > 1
+      #endif // MULTILED
+        break;
       case NeoPixelType_Grbw: _pGrbw->Show(); break;
     }
   }
@@ -286,7 +417,33 @@ public:
   {
     switch (_type) {
       case NeoPixelType_Grb: {
+        #ifndef MULTILED
         _pGrb->SetPixelColor(indexPixel, RgbColor(color.R,color.G,color.B));
+        #else
+        if (indexPixel < LEDPERPIN) { _pGrb->SetPixelColor(indexPixel & LEDMASK, RgbColor(color.R,color.G,color.B)); return; }
+          #if MULTILED > 1
+        if (indexPixel < 2 * LEDPERPIN) { _pGrb1->SetPixelColor(indexPixel & LEDMASK, RgbColor(color.R,color.G,color.B)); return; }
+          #if MULTILED > 2
+        if (indexPixel < 3 * LEDPERPIN) { _pGrb2->SetPixelColor(indexPixel & LEDMASK, RgbColor(color.R,color.G,color.B)); return; }
+          #if MULTILED > 3
+        if (indexPixel < 4 * LEDPERPIN) { _pGrb3->SetPixelColor(indexPixel & LEDMASK, RgbColor(color.R,color.G,color.B)); return; }
+          #if MULTILED > 4
+        if (indexPixel < 5 * LEDPERPIN) { _pGrb4->SetPixelColor(indexPixel & LEDMASK, RgbColor(color.R,color.G,color.B)); return; }
+          #if MULTILED > 5
+        if (indexPixel < 6 * LEDPERPIN) { _pGrb5->SetPixelColor(indexPixel & LEDMASK, RgbColor(color.R,color.G,color.B)); return; }
+          #if MULTILED > 6
+        if (indexPixel < 7 * LEDPERPIN) { _pGrb6->SetPixelColor(indexPixel & LEDMASK, RgbColor(color.R,color.G,color.B)); return; }
+          #if MULTILED > 7
+        if (indexPixel < 8 * LEDPERPIN) { _pGrb7->SetPixelColor(indexPixel & LEDMASK, RgbColor(color.R,color.G,color.B)); return; }
+          #endif // MULTILED > 7
+          #endif // MULTILED > 6
+          #endif // MULTILED > 5
+          #endif // MULTILED > 4
+          #endif // MULTILED > 3
+          #endif // MULTILED > 2
+          #endif // MULTILED > 1
+        //}
+        #endif MULTILED
       }
       break;
       case NeoPixelType_Grbw: {
@@ -304,7 +461,31 @@ public:
   void SetBrightness(byte b)
   {
     switch (_type) {
-      case NeoPixelType_Grb: _pGrb->SetBrightness(b);   break;
+      case NeoPixelType_Grb: _pGrb->SetBrightness(b);   
+      #ifdef MULTILED
+        #if MULTILED > 1
+        _pGrb1->SetBrightness(b);
+        #if MULTILED > 2
+        _pGrb2->SetBrightness(b);
+        #if MULTILED > 3
+        _pGrb3->SetBrightness(b);
+        #if MULTILED > 4
+        _pGrb4->SetBrightness(b);
+        #if MULTILED > 5
+        _pGrb5->SetBrightness(b);
+        #if MULTILED > 6
+        _pGrb6->SetBrightness(b);
+        #if MULTILED > 7
+        _pGrb7->SetBrightness(b);
+        #endif // MULTILED > 7
+        #endif // MULTILED > 6
+        #endif // MULTILED > 5
+        #endif // MULTILED > 4
+        #endif // MULTILED > 3
+        #endif // MULTILED > 2
+        #endif // MULTILED > 1
+      #endif // MULTILED
+        break;
       case NeoPixelType_Grbw:_pGrbw->SetBrightness(b);  break;
     }
   }
@@ -314,21 +495,40 @@ public:
   RgbwColor GetPixelColorRgbw(uint16_t indexPixel) const
   {
     switch (_type) {
-      case NeoPixelType_Grb:  return _pGrb->GetPixelColor(indexPixel);  break;
+      case NeoPixelType_Grb:  
+        #ifndef MULTILED
+        return _pGrb->GetPixelColor(indexPixel);  break;
+        #else
+        switch ((indexPixel >> LEDSHIFT) & 0x03) {
+          case 0: return _pGrb->GetPixelColor(indexPixel & LEDMASK);  break;
+          #if MULTILED > 1
+          case 1: return _pGrb1->GetPixelColor(indexPixel & LEDMASK);  break;
+          #if MULTILED > 2
+          case 2: return _pGrb2->GetPixelColor(indexPixel & LEDMASK);  break;
+          #if MULTILED > 3
+          case 3: return _pGrb3->GetPixelColor(indexPixel & LEDMASK);  break;
+          #if MULTILED > 4
+          case 4: return _pGrb4->GetPixelColor(indexPixel & LEDMASK);  break;
+          #if MULTILED > 5
+          case 5: return _pGrb5->GetPixelColor(indexPixel & LEDMASK);  break;
+          #if MULTILED > 6
+          case 6: return _pGrb6->GetPixelColor(indexPixel & LEDMASK);  break;
+          #if MULTILED > 7
+          case 7: return _pGrb7->GetPixelColor(indexPixel & LEDMASK);  break;
+          #endif // MULTILED > 7
+          #endif // MULTILED > 6
+          #endif // MULTILED > 5
+          #endif // MULTILED > 4
+          #endif // MULTILED > 3
+          #endif // MULTILED > 2
+          #endif // MULTILED > 1
+        }
+        #endif MULTILED
+      break;
       case NeoPixelType_Grbw: return _pGrbw->GetPixelColor(indexPixel); break;
     }
     return 0;
   }
-
-  uint8_t* GetPixels(void)
-  {
-    switch (_type) {
-      case NeoPixelType_Grb:  return _pGrb->Pixels();  break;
-      case NeoPixelType_Grbw: return _pGrbw->Pixels(); break;
-    }
-    return 0;
-  }
-
 
 private:
   NeoPixelType _type;
@@ -336,12 +536,60 @@ private:
   // have a member for every possible type
   NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD>*  _pGrb;
   NeoPixelBrightnessBus<PIXELFEATURE4,PIXELMETHOD>* _pGrbw;
+  #ifdef MULTILED
+    #if MULTILED > 1
+    NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD1>*  _pGrb1;
+    #if MULTILED > 2
+    NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD2>*  _pGrb2;
+    #if MULTILED > 3
+    NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD3>*  _pGrb3;
+    #if MULTILED > 4
+    NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD4>*  _pGrb4;
+    #if MULTILED > 5
+    NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD5>*  _pGrb5;
+    #if MULTILED > 6
+    NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD6>*  _pGrb6;
+    #if MULTILED > 7
+    NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD7>*  _pGrb7;
+    #endif // MULTILED > 7
+    #endif // MULTILED > 6
+    #endif // MULTILED > 5
+    #endif // MULTILED > 4
+    #endif // MULTILED > 3
+    #endif // MULTILED > 2
+    #endif // MULTILED > 1
+  #endif // MULTILED
 
   void cleanup()
   {
     switch (_type) {
-      case NeoPixelType_Grb:  delete _pGrb ; _pGrb  = NULL; break;
-      case NeoPixelType_Grbw: delete _pGrbw; _pGrbw = NULL; break;
+      case NeoPixelType_Grb:  delete _pGrb ; _pGrb  = NULL; 
+      #ifdef MULTILED
+        #if MULTILED > 1
+        delete _pGrb1 ; _pGrb1  = NULL; 
+        #if MULTILED > 2
+        delete _pGrb2 ; _pGrb2  = NULL; 
+        #if MULTILED > 3
+        delete _pGrb3 ; _pGrb3  = NULL; 
+        #if MULTILED > 4
+        delete _pGrb4 ; _pGrb4  = NULL; 
+        #if MULTILED > 5
+        delete _pGrb5 ; _pGrb5  = NULL; 
+        #if MULTILED > 6
+        delete _pGrb6 ; _pGrb6  = NULL; 
+        #if MULTILED > 7
+        delete _pGrb7 ; _pGrb7  = NULL; 
+        #endif // MULTILED > 7
+        #endif // MULTILED > 6
+        #endif // MULTILED > 5
+        #endif // MULTILED > 4
+        #endif // MULTILED > 3
+        #endif // MULTILED > 2
+        #endif // MULTILED > 1
+      #endif // MULTILED
+        break;
+      case NeoPixelType_Grbw: delete _pGrbw; _pGrbw = NULL; 
+        break;
     }
   }
 };
