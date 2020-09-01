@@ -3,8 +3,8 @@
 #define NpbWrapper_h
 
 //PIN CONFIGURATION
-//PIN CONFIGURATION
 #ifdef MULTILED
+#ifdef ARDUINO_ARCH_ESP32
   #define LEDPIN 19
   #define LEDPIN0 19
   #define PIXELMETHOD NeoEsp32Rmt0Ws2812xMethod
@@ -42,6 +42,26 @@
   #endif // MULTILED > 3
   #endif // MULTILED > 2
   #endif // MULTILED > 1
+#endif // ARDUINO_ARCH_ESP32
+#ifdef ESP8266
+  #define LEDPIN 2 // DO NOT CHANGE THIS
+  #define LEDPIN0 2 // SERIOUSLY DON'T, USE PINS 2 & 3
+  #define PIXELMETHOD NeoEsp8266Uart1Ws2813Method
+  #define PIXELMETHOD0 NeoEsp8266Uart1Ws2813Method
+                         // for speed this implementation uses bit shifting and masking, hopefully quicker than integer math
+                         // you must fill the 3 values below with matching a column from this table for your longest string
+  #define LEDPERPIN 64   // this needs to represent a binary digit value,  e.g. 2,    4,    8,    16,   32,   64,   128,  256
+  #define LEDSHIFT 6     // number of bits to shift, based on LEDSPERPIN        1,    2,    3,    4,    5,    6,    7,    8
+  #define LEDMASK 0x3f   // the remainder mask, to send pin specific led        0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff
+  #if MULTILED > 1
+  #define LEDPIN1 3 // Don't change this either.
+  #define PIXELMETHOD1 NeoEsp8266Dma800KbpsMethod
+  #if MULTILED > 2
+  #undef MULTILED
+  #define MULTILED 2 // cap at 2 for esp8266
+  #endif // MULTILED > 2
+  #endif // MULTILED > 1
+#endif // ESP8266
 #endif // MULTILED
 
 #ifndef LEDPIN
