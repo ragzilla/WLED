@@ -45,7 +45,7 @@
 #endif // ARDUINO_ARCH_ESP32
 #ifdef ESP8266
   #define LEDPIN 2 // DO NOT CHANGE THIS
-  #define LEDPIN0 2 // SERIOUSLY DON'T, USE PINS 2 & 3
+  #define LEDPIN0 2 // SERIOUSLY DON'T, USE PINS 2 & 1
   #define PIXELMETHOD NeoEsp8266Uart1Ws2813Method
   #define PIXELMETHOD0 NeoEsp8266Uart1Ws2813Method
                          // for speed this implementation uses bit shifting and masking, hopefully quicker than integer math
@@ -54,8 +54,8 @@
   #define LEDSHIFT 6     // number of bits to shift, based on LEDSPERPIN        1,    2,    3,    4,    5,    6,    7,    8
   #define LEDMASK 0x3f   // the remainder mask, to send pin specific led        0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff
   #if MULTILED > 1
-  #define LEDPIN1 3 // Don't change this either.
-  #define PIXELMETHOD1 NeoEsp8266Dma800KbpsMethod
+  #define LEDPIN1 1 // Don't change this either.
+  #define PIXELMETHOD1 NeoEsp8266Uart0Ws2813Method
   #if MULTILED > 2
   #undef MULTILED
   #define MULTILED 2 // cap at 2 for esp8266
